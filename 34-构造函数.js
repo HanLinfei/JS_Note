@@ -25,3 +25,19 @@ var p1 = new Person("hlf", 20, "男")
 var p2 = new Person("hpy", 20, "女")
 p1.running()
 console.log(p1);
+
+// 通过上面创建了一个构造函数 我们发现，当我们每次通过new一个函数时候，他都会在内部重新创建一个新的对象
+// 然后其中这个新的对象里面他每次都会重新创建一个函数，可是这个函数他做的又都是相同的，然后每次都去创建
+// 这个函数时候，就都会重新创建一个函数对象，这样就导致的很浪费，所以我们可以做以下优化
+
+function Person_new(name, age, gender) {
+    this.name = name
+    this.age = age
+    this.gender = gender
+}
+Person_new.prototype.running = function () {
+    console.log(this.name + '在跑步');
+}
+var p3 = new Person_new("hlf", 20, "男")
+p3.running()
+// 我们可以在这个原型对象中进行创建一个函数

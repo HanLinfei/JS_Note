@@ -16,7 +16,7 @@ fn函数有两个原型对象：1.  fn对象的原型对象(隐式原型)fn.    
     }
     并且会把这个对象给到this  this = obj
     然后会接着把fn函数对象中的prototype属性给覆盖到这个被创建的对象中的prototype属性
-    obj.__proto__(隐式原型)   =   fn.prototype(隐式原型)
+    obj.__proto__(隐式原型)   =   fn.prototype
     这时候他们的地址就都指向了最终的fn函数原型对象(显示原型)
     obj.__proto === fn.prototype
     所以就说明了最终在fn函数内部创建的对象 最终都是指向的是fn函数原型对象
@@ -42,4 +42,4 @@ console.log(fn.prototype);
 console.log(obj1);
 
 // 从上面就可以看出，不管更改的是函数对象的原型属性 还是更改的是创建的obj对象的原型属性
-// 他们都是改的同一个对象 那就是最终的fn.prototype对象 也就是函数原型对象 
+// 他们都是改的同一个对象  也就是函数原型对象 
