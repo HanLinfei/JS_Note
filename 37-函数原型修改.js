@@ -2,7 +2,7 @@ function foo() {
 
 }
 // 1.此时内存里创建了一个foo函数对象
-// 2.函数对象中存放着PanentScope(父级作用域)：Parent、[[prototype]]属性:foo函数的原型对象、代码体
+// 2.函数对象中存放着PanentScope(父级作用域)、[[prototype]]属性、代码体
 // foo:{
 // PanentScope:Parent
 // [[prototype]]:foo函数原型对象
@@ -13,6 +13,8 @@ function foo() {
 //  foo:{
 //      constructor:foo函数
 // }
+//
+// 
 /*
 假如我现在通过prototype.name = "hlf" 这样添加
 此时就相当于是在foo函数的原型对象中又添加了一个属性
