@@ -18,3 +18,4 @@ Object的原型对象[Object:null prototype]{}  :  {
 这个Object原型对象中其实是有很多东西的，因为设置了不可枚举所以打印不出来，他不是一个空对象
 他也是我们所有对象的最顶层的原型对象 一般沿着原型链来找 找到他就会停止寻找了
 */
+console.log(Object.__proto__);
