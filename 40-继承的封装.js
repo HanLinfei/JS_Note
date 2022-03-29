@@ -7,7 +7,7 @@ function inheritPrototype(Child, Parent) {
         value: Child
     })
 }
-
+// 第一个参数是需要继承的，第二个参数是被继承的 第一个是子 第二个是父
 function Person(name, age, sex) {
     this.name = name
     this.age = age
