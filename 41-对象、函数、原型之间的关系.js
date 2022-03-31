@@ -7,7 +7,7 @@ console.log(obj.__proto__);//他打印的是顶层原型对象 他指向的原�
 console.log(obj.__proto__ === Object.prototype);//true 
 //对象里面是有一个__proto__对象(隐式原型对象)
 
-function foo(){
+function foo() {
 
 }
 // foo函数是一个函数，所以他就会有一个显示原型对象:foo.prototype
@@ -16,5 +16,5 @@ function foo(){
 
 // 函数本身也是一个对象，所以他也还会有一个隐式原型对象：foo.__proto__
 // foo.__proto__来自哪里
-// 函数创建的时候 实际上是通过 nwe Function() 所以实际上是把 Function.ptototype给到了foo.__proto__
+// 函数创建的时候 实际上是通过 new Function() 所以实际上是把 Function.ptototype给到了foo.__proto__
 //Function.prototype = {constructor:Function} 
