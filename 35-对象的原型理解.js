@@ -2,7 +2,7 @@ var obj = {}
 // 获取原型的两种方法
 console.log(obj.__proto__);
 console.log(Object.getPrototypeOf(obj));
-// 我们每个对象的属性中都有一个 [[prototype]](原型)
+// 我们每个对象的属性中都有一个 __proto__
 // 这个原型是一个对象,并且这个是一个隐式原型
 
 // 原型的作用
