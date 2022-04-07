@@ -6,29 +6,35 @@ const obj = {
     address: '武汉'
 }
 
+const info = {
+    name: 'feizi',
+    age: '22'
+}
 
+
+//这个整体思路：
+// 我们在WeakMap对象里面用来存放map 而这个map实际上其实就是一个个的对象 每一个对象都有一个自己的map对象
+// 然后在我们的map里面 还有一个个的被管理的属性 这个被管理的属性实际上就是当前被修改的属性 
 const targetMap = new WeakMap()
 function getDepend(target, key) {
     //根据target对象获取map的过程
-    console.log(target);
+    //这个map实际上就是一个被管理的对象，每次都来获取一下传过来的对象实际上就是来判断一下
+    //能不能获取的到 如果可以获取得到 这说明这个对象就是原有的 意思就是之前已经传过的对象 
+    //所以我们就没必要在给他重新创建一个map了 
+    //所以相反 如果获取不到 就说明现在传过来的对象是新对象 我们就需要给他一个专属的管理的map
     let map = targetMap.get(target)
-    console.log(map);
     if (!map) {
         map = new Map()
-        console.log(map);
         targetMap.set(target, map)
     }
-    console.log(targetMap);
-    console.log(map);
-    //根据key获取depend对象
 
+    //根据key获取depend对象
+    //这个也是一个道理 我们首先获取一下传过来的key 如果这个key有获取到 就说明他在之前已经存在自己的map对象了
+    //所以我们就不需要再次来创建属于他的新的map对象 
     let depend = map.get(key)
-    console.log(depend);
     if (!depend) {
         depend = new Depend()
-        console.log(depend);
         map.set(key, depend)
-        console.log(map);
     }
     return depend
 }
@@ -43,6 +49,10 @@ const objProxy = new Proxy(obj, {
         getDepend(target, key)
     }
 })
+
+
+
+
 
 
 
@@ -74,6 +84,7 @@ watchFn(() => {
 
 objProxy.age = 22
 objProxy.name = 'linfeizi'
+infoProxy.name = 'hanlinfei'
 //我们发现 当数据我们发生变化了之后 他就会去执行notify方法 这时候就会产生一个问题：会把所有被监听的代码块
 //都执行一遍，很显然不符合逻辑，我们只需要把被改变数据的代码块响应式的执行一遍 而不是所有的 所以我们需要进一步区分
 
