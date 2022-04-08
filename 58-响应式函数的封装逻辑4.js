@@ -56,9 +56,7 @@ const objProxy = new Proxy(obj, {
 
 
 
-function watchFn(fn) {
-    depend.addDepend(fn)
-}
+
 
 
 class Depend {
@@ -78,13 +76,15 @@ class Depend {
 
 
 const depend = new Depend()
+function watchFn(fn) {
+    depend.addDepend(fn)
+}
 watchFn(() => {
     console.log(`${objProxy.name}今年${objProxy.age}岁，他在${objProxy.address}上学`)
 })
 
 objProxy.age = 22
 objProxy.name = 'linfeizi'
-infoProxy.name = 'hanlinfei'
 //我们发现 当数据我们发生变化了之后 他就会去执行notify方法 这时候就会产生一个问题：会把所有被监听的代码块
 //都执行一遍，很显然不符合逻辑，我们只需要把被改变数据的代码块响应式的执行一遍 而不是所有的 所以我们需要进一步区分
 
