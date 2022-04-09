@@ -4,7 +4,6 @@ class Person {
     constructor(name, age) {
         this.name = name
         this.age = age
-
     }
     //在这个类里面直接定义函数就是相当于把这个函数放在了我们类的原型对象上面
     eating() {
@@ -20,5 +19,5 @@ class Person {
 }
 
 var p1 = new Person('hlf', 20)
-console.log(p1);
+p1.eating()
 Person.createPerson()
