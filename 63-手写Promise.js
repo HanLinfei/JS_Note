@@ -9,6 +9,8 @@ class Promise_ {
         this.status = PROMISE_STATUS_PENDING
         this.value = undefined
         this.reason = undefined
+        this.onFulfilledcallbacks = []
+        this.onRejectedcallbacks = []
         //此时我们在外面调用这个函数时候，要求传一个res
         const resolve = (value) => {
             if (this.status === PROMISE_STATUS_PENDING) {
@@ -16,42 +18,71 @@ class Promise_ {
                 //执行顺序上 我们必须执行完毕了then方法之后 才会产生一个函数 
                 //而我们这个顺序是大于then方法的 所以我们先给他进行一个异步任务进行延时
                 //让then方法这个同步任务先执行了 产生了函数之后 最后再来执行他
-                this.status = PROMISE_STATUS_REJECT
                 queueMicrotask(() => {
+                    //可以防止把这两个微任务都加入进去，这两个在实际中只能存在一个
+                    if (this.status !== PROMISE_STATUS_PENDING) return
+                    this.status = PROMISE_STATUS_FINALLY
                     this.value = value
-                    this.onFulfilled(this.value)
+                    this.onFulfilledcallbacks.forEach((callbackFn) => {
+                        callbackFn(this.value)
+                    })
                 })
+
             }
         }
         //此时我们在外面调用这个函数的时候，要求传一个err
         const reject = (reason) => {
             if (this.status === PROMISE_STATUS_PENDING) {
-                this.status = PROMISE_STATUS_REJECT
                 queueMicrotask(() => {
+                    if (this.status !== PROMISE_STATUS_PENDING) return
+                    this.status = PROMISE_STATUS_REJECT
                     this.reason = reason
-                    this.onRejected(this.reason)
+                    this.onRejectedcallbacks.forEach((callbackFn) => {
+                        callbackFn(this.reason)
+                    })
                 })
+
             }
         }
         executor(resolve, reject)//直接调用我们传入的函数 
         //然后把我们的对应的resolve函数和reject函数传下去执行
     }
     then(onFulfilled, onRejected) {
-        this.onFulfilled = onFulfilled
-        this.onRejected = onRejected
+        //1.如果then在调用时候，状态已经确定下来了
+        console.log(this.status);
+        if (this.status === PROMISE_STATUS_FINALLY && onFulfilled)
+            onFulfilled(this.value)
+        if (this.status === PROMISE_STATUS_REJECT && onRejected)
+            onRejected(this.reason)
+        if (this.status === PROMISE_STATUS_PENDING) {
+            this.onFulfilledcallbacks.push(onFulfilled)
+            this.onRejectedcallbacks.push(onRejected)
+        }
+        //因为别人可能调用多个then方法 所以我们最好是将这些回调函数放进数组中
+        //将成功的回调函数和失败的回调函数都放进数组中
     }
 }
 
-new Promise_((resolve, reject) => {
-    // 上面已经传进来了两个函数 我们在这里直接执行
-    resolve("success")
-    reject("err message ")
-}).then((res) => {
-    console.log('res', res);
-}, (err) => {
-    console.log('err', err);
+const promise = new Promise_((resolve, reject) => {
+    // resolve("hahhaha")
+    reject("erro message")
 })
 
+promise.then(res => {
+    console.log("p11111", res);
+}, err => {
+    console.log("p11111", err);
+})
+
+promise.then(res => {
+    console.log("p22222", res);
+}, err => {
+    console.log("p22222", err);
+})
+
+setTimeout(() => {
+    promise.then(res => console.log("res", res), err => { console.log("err", err); })
+}, 3000);
 
 //  执行顺序：
 /*
