@@ -12,6 +12,7 @@ class Promise_ {
         this.onFulfilledcallbacks = []
         this.onRejectedcallbacks = []
         //此时我们在外面调用这个函数时候，要求传一个res
+
         const resolve = (value) => {
             if (this.status === PROMISE_STATUS_PENDING) {
                 //这里使用一个异步任务是因为：
@@ -44,22 +45,59 @@ class Promise_ {
 
             }
         }
-        executor(resolve, reject)//直接调用我们传入的函数 
+        try {
+            executor(resolve, reject)//直接调用我们传入的函数 
+        } catch (err) {
+            reject(err)
+        }
         //然后把我们的对应的resolve函数和reject函数传下去执行
     }
     then(onFulfilled, onRejected) {
         //1.如果then在调用时候，状态已经确定下来了
-        console.log(this.status);
-        if (this.status === PROMISE_STATUS_FINALLY && onFulfilled)
-            onFulfilled(this.value)
-        if (this.status === PROMISE_STATUS_REJECT && onRejected)
-            onRejected(this.reason)
-        if (this.status === PROMISE_STATUS_PENDING) {
-            this.onFulfilledcallbacks.push(onFulfilled)
-            this.onRejectedcallbacks.push(onRejected)
-        }
-        //因为别人可能调用多个then方法 所以我们最好是将这些回调函数放进数组中
-        //将成功的回调函数和失败的回调函数都放进数组中
+        //这里的整体思路大概就是 我们使用一个异步任务来最后执行
+        //因为在没有异步任务真正执行之前 我们的状态永远都是 pending
+        //这就意味着 我们永远不会去确定状态 永远不会执行到状态函数(resolve,reject)
+        //直到我们的链式调用方法then 全部执行完毕 
+        //这也就是意味着我们then中的状态都被按顺序加入到数组里 然后依次按顺序执行
+        return new Promise_((resolve, reject) => {
+            if (this.status === PROMISE_STATUS_FINALLY && onFulfilled) {
+                try {
+                    const value = onFulfilled(this.value)
+                    resolve(value)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+            if (this.status === PROMISE_STATUS_REJECT && onRejected) {
+                const reason = onRejected(this.reason)
+                try {
+                    resolve(reason)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+            if (this.status === PROMISE_STATUS_PENDING) {
+                this.onFulfilledcallbacks.push(() => {
+                    try {
+                        const value = onFulfilled(this.value)
+                        resolve(value)
+                    } catch (err) {
+                        reject(err)
+                    }
+
+                })
+                this.onRejectedcallbacks.push(() => {
+                    try {
+                        const reason = onRejected(this.reason)
+                        resolve(reason)
+                    } catch (err) {
+                        reject(err)
+                    }
+                })
+            }
+            //因为别人可能调用多个then方法 所以我们最好是将这些回调函数放进数组中
+            //将成功的回调函数和失败的回调函数都放进数组中
+        })
     }
 }
 
@@ -70,19 +108,17 @@ const promise = new Promise_((resolve, reject) => {
 
 promise.then(res => {
     console.log("p11111", res);
+    return "aaaa"
 }, err => {
     console.log("p11111", err);
-})
-
-promise.then(res => {
+    return "aaaa"
+}).then(res => {
     console.log("p22222", res);
 }, err => {
     console.log("p22222", err);
 })
 
-setTimeout(() => {
-    promise.then(res => console.log("res", res), err => { console.log("err", err); })
-}, 3000);
+
 
 //  执行顺序：
 /*
