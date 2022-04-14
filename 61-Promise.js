@@ -139,7 +139,7 @@ Promise.all([P1, P2, P3]).then(res => {
 })
 
 // Promise.allSettled 方法和 all方法类似
-// 只不过allsettled方法不判定状态 他最终是会必然执行的
+// 只不过allsettled方法不判定状态 他最终是会必然执行的 
 
 // Promise.race 方法和all方法类似
 //这个方法是只要有一个Promise状态已经确定 那么他就会结束

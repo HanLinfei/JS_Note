@@ -59,6 +59,8 @@ class Promise_ {
         //这就意味着 我们永远不会去确定状态 永远不会执行到状态函数(resolve,reject)
         //直到我们的链式调用方法then 全部执行完毕 
         //这也就是意味着我们then中的状态都被按顺序加入到数组里 然后依次按顺序执行
+        onRejected = onRejected || (err => { throw err })
+        // onFulfilled = onFulfilled || (value => { return value })
         return new Promise_((resolve, reject) => {
             if (this.status === PROMISE_STATUS_FINALLY && onFulfilled) {
                 try {
@@ -77,7 +79,7 @@ class Promise_ {
                 }
             }
             if (this.status === PROMISE_STATUS_PENDING) {
-                this.onFulfilledcallbacks.push(() => {
+                if (onFulfilled) this.onFulfilledcallbacks.push(() => {
                     try {
                         const value = onFulfilled(this.value)
                         resolve(value)
@@ -86,7 +88,7 @@ class Promise_ {
                     }
 
                 })
-                this.onRejectedcallbacks.push(() => {
+                if (onRejected) this.onRejectedcallbacks.push(() => {
                     try {
                         const reason = onRejected(this.reason)
                         resolve(reason)
@@ -99,6 +101,94 @@ class Promise_ {
             //将成功的回调函数和失败的回调函数都放进数组中
         })
     }
+    //catch的实现逻辑：
+    /*
+    假如我们没有在then方法里传入第二个回调函数，那么我们就直接给他抛出异常，让他跳出来跑到下面继续执行
+    //所以我们在下面就可以直接调用catch方法，catch方法里直接再次调用then方法 然后把我们的rejected回调
+    传进去 然后再次处理错误信息 把回调加入到数组中
+
+    */
+    catch(onRejected) {
+        this.then(undefined, onRejected)
+    }
+    // //因为不管是成功还是失败都要来执行finally 所以在这里都要执行
+    // finally(onfinally) {
+    //     this.then(() => {
+    //         onfinally()
+    //     }, () => {
+    //         onfinally()
+    //     })
+    // }
+
+    static resolve(value) {
+        return new Promise_((resolve) => resolve(value))
+    }
+    static reject(reason) {
+        return new Promise_((resolve, reject) => {
+            reject(reason)
+        })
+    }
+
+    static all(promises) {
+        //思路：什么时候要执行resolve 什么时候要执行reject
+        //返回一个Promsie对象 然后我们要确定下来到底什么时候来返回  
+        const values = []
+        return new Promise_((resolve, reject) => {
+            promises.forEach(promise => {
+                promise.then(res => {
+                    values.push(res)
+                    if (promises.length === values.length)
+                        resolve(values)
+                }, err => {
+                    reject(err)
+                })
+            })
+        })
+    }
+
+    static allSettled(promises) {
+        const results = []
+        return new Promise_((resolve, reject) => {
+            promises.forEach(promise => {
+                promise.then((res) => {
+                    results.push({ status: PROMISE_STATUS_FINALLY, value: res })
+                    if (promises.length === results.length)
+                        resolve(results)
+                }, err => {
+                    results.push({ status: PROMISE_STATUS_REJECT, value: err })
+                    if (promises.length === results.length)
+                        resolve(results)
+                })
+            })
+        })
+    }
+
+    static race(promises) {
+        return new Promise_((resolve, reject) => {
+            promises.forEach((promise) => {
+                promise.then(res => {
+                    resolve(res)
+                }, err => {
+                    reject(err)
+                })
+            })
+        })
+    }
+
+    static any(promises) {
+        const reason = []
+        return new Promise_((resolve, reject) => {
+            promises.forEach(promise => {
+                promise.then(res => {
+                    resolve()
+                }, err => {
+                    reason.push(err)
+                    if (reason.length === promises.length)
+                        reject(new AggregateError(reason))
+                })
+            })
+        })
+    }
 }
 
 const promise = new Promise_((resolve, reject) => {
@@ -108,17 +198,38 @@ const promise = new Promise_((resolve, reject) => {
 
 promise.then(res => {
     console.log("p11111", res);
-    return "aaaa"
-}, err => {
-    console.log("p11111", err);
-    return "aaaa"
-}).then(res => {
-    console.log("p22222", res);
-}, err => {
-    console.log("p22222", err);
+}).catch(err => {
+    console.log('p11111', err);
 })
 
+const p1 = new Promise_((resolve, reject) => {
+    setTimeout(() => {
+        resolve("p1111")
+    }, 1000);
+})
 
+const p2 = new Promise_((resolve, reject) => {
+    setTimeout(() => {
+        reject("p2222")
+    }, 2000);
+})
+
+const p3 = new Promise_((resolve, reject) => {
+    setTimeout(() => {
+        resolve("p3333")
+    }, 3000);
+})
+
+// Promise_.all([p1, p2, p3]).then(res => {
+//     console.log(res);
+// }).catch(err => {
+//     console.log(err);
+// })
+Promise_.allSettled([p1, p2, p3]).then(res => {
+    console.log(res);
+}).catch(err => {
+    console.log(err);
+})
 
 //  执行顺序：
 /*
