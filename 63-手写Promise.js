@@ -166,7 +166,7 @@ class Promise_ {
     static race(promises) {
         return new Promise_((resolve, reject) => {
             promises.forEach((promise) => {
-                promise.then(res => {
+                promise.then(res => { 
                     resolve(res)
                 }, err => {
                     reject(err)
