@@ -34,3 +34,25 @@ function* foo() {
 const foo_ = foo()
 console.log(foo_.next());
 console.log(foo_.next("hhahahhah"));
+
+//生成器因为本身就是一个特殊的迭代器，并且生成器还可以返回值 所以我们可以通过生成器来替代迭代器
+
+
+class School {
+    constructor(name, grade, students) {
+        this.name = name
+        this.grade = grade
+        this.students = students
+    }
+    //此时这里就通过创建了一个生成器函数 然后每次在生成器内部通过yield来返回对应的对象
+    //yield返回的对象也就是 对应的迭代对象 而yield*语法相当于就是从我们的这个数组中每次取出一个 然后进行返回
+    [Symbol.iterator] = function* () {
+        yield* this.students
+    }
+}
+
+const s1 = new School('行政楼307', '计应2002', ['hlf', 'jcy', 'kxc', 'lj'])
+
+for (const student of s1) {
+    console.log(student);
+}
