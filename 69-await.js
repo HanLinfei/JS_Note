@@ -11,6 +11,8 @@ function getData() {
 async function foo() {
     //await 执行的表达式是有返回值的 他的返回值就是我们Promise中的执行结果
     //await会等到后面表达式有了结果之后才会继续往后执行
+    //强调：await后面的表达式内 必须有结果了之后才会执行 
+    //也就是说 我们可以理解为await这一行代码后面的代码是被加入到then里面在
     const res = await getData()
 
 }
