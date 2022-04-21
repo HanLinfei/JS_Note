@@ -47,8 +47,9 @@
 // const name = 'hlf'
 // const age = 20
 // export default age
-// export {
+// export default {
 //     name,
+//     age,
 //     age as default
 // }
 

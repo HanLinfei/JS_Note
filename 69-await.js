@@ -23,3 +23,25 @@ foo().catch(err => {
 
 
 //如果内部await后面的 Promise状态是reject 那么他会作为整个异步函数的返回值来执行catch
+
+//请求北京的天气
+async function requestWeather() {
+    const result = await getWeatherData()
+    console.log(result);
+}
+
+function getWeatherData() {
+    return new Promise((resolve, reject) => {
+        const requestHttp = new XMLHttpRequest()
+        requestHttp.open('get', 'https://devapi.qweather.com/v7/weather/now?location=101010100&key=4fc8d88357c948acaad13b98849ef139')
+        requestHttp.send()
+        requestHttp.onreadystatechange = function () {
+            if (requestHttp.readyState === 4)
+                if (requestHttp.status === 200)
+                    resolve(JSON.parse(requestHttp.responseText))
+                else throw new Error("获取数据错误");
+        }
+    })
+}
+
+requestWeather()

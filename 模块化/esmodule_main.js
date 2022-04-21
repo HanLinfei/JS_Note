@@ -12,7 +12,6 @@
 //4.默认导入
 // import age from "./esmodule_A.js"
 // console.log(age);
-
 //import导入时候 需要去解析被导入的那个文件
 //那么也就是说他是同步的 必须得等到他解析完成拿到结果之后才可以进行后续操作
 //所以 现在就出现了一种异步导入解析文件的函数 import直接当做函数来使用
@@ -20,3 +19,6 @@
 // import("./esmodule_B.js").then(res=>{
 //  console.log(res)
 // })
+
+//import导入的变量是不可以进行修改的
+
